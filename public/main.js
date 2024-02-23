@@ -1,45 +1,83 @@
-// import '../styles/main.scss'; // You have to import your styles for them to work. Comment in this line
+import '../styles/main.scss';
+// You have to import your styles for them to work. Comment in this line
+const houses = [
+  {
+    house: 'gryffindor',
+    crest:
+      'https://static.wikia.nocookie.net/pottermore/images/1/16/Gryffindor_crest.png'
+  },
+  {
+    house: 'slytherin',
+    crest:
+      'https://static.wikia.nocookie.net/pottermore/images/4/45/Slytherin_Crest.png'
+  },
+  {
+    house: 'hufflepuff',
+    crest:
+      'https://static.wikia.nocookie.net/pottermore/images/5/5e/Hufflepuff_crest.png'
+  },
+  {
+    house: 'ravenclaw',
+    crest:
+      'https://static.wikia.nocookie.net/pottermore/images/4/4f/Ravenclaw_crest.png'
+  }
+];
 
-const startApp = () => {
-  htmlStructure(); // always load first
-  header();
-  startSortingBtn();
-  events(); // always load last
+const renderToDOM = (divId, content) => {
+  const selectedDiv = document.querySelector(divId);
+  selectedDiv.innerHTML = content;
 };
 
-const students = [];
-const voldysArmy; // starts as an empty array
+const studentsOnDom = (divId, array, house = 'Hogwarts') => {
+  let domString = '';
+  if (!array.length) {
+    domString += `NO ${house.toUpperCase()} STUDENTS`;
+  }
 
+  const students = [];
+  const voldysArmy = []; // starts as an empty array
 
-const events = () => {
-  // get form on the DOM on button click
-  document.querySelector('#start-sorting').addEventListener('click', () => {
-    // put html elements on the DOM on click
-    form(); // form
-    filterBtnRow(); // filter buttons
-    studentAreas(); // students and voldy's army divs
-  });
+  const form = () => {
+    const domString = `<form id="sorting" class="d-flex flex-column form-floating ">
+      <input
+      type="text"
+      class="form-control mb-1"
+      id="student-name"
+      placeholder="Enter a name"
+      required
+    />
+    <label for="floatingInputValue">Name to be sorted</label>
+  <button type="submit" class="btn btn-success">Get Sorted!</button>
+  </form>`;
 
-  // target expel buttons to move to voldys army
-  document
-    .querySelector('#student-container')
-    .addEventListener('click', (e) => {
-      if (e.target.id.includes('expel')) {
-        const [, id] = e.target.id.split('--');
-        const index = students.findIndex((student) => student.id === Number(id));
+    renderToDOM('#form-container', domString);
 
-        // move from one array to another
-        voldysArmy.push(...students.splice(index, 1));
-        // get both sets of students on the DOM
-        studentsOnDom('#students', students);
-        studentsOnDom('#voldy', voldysArmy);
-      }
-    });
+    // has to be put on the DOM after form is on DOM, not before
+    // on form submit, sort student
+    document.querySelector('#sorting').addEventListener('submit', sortStudent);
+  };
+  
 
-  // target filter buttons on Dom
-  document.querySelector('#filter-container').addEventListener('click', (e) => {
-    if (e.target.id.includes('filter')) {
-      const [, house] = e.target.id.split('--');
+    // target expel buttons to move to voldys army
+    document
+      .querySelector('#student-container')
+      .addEventListener('click', (e) => {
+        if (e.target.id.includes('expel')) {
+          const [, id] = e.target.id.split('--');
+          const index = students.findIndex((student) => student.id === Number(id));
+
+          // move from one array to another
+          voldysArmy.push(...students.splice(index, 1));
+          // get both sets of students on the DOM
+          studentsOnDom('#students', students);
+          studentsOnDom('#voldy', voldysArmy);
+        }
+      });
+
+    // target filter buttons on Dom
+    document.querySelector('#filter-container').addEventListener('click', (e) => {
+      if (e.target.id.includes('filter')) {
+        const [, house] = e.target.id.split('--');
 
         if (house === 'all') {
           studentsOnDom('#students', students);
@@ -47,13 +85,13 @@ const events = () => {
           const filter = students.filter((student) => student.house === house);
           studentsOnDom('#students', filter, house);
         }
-    }
-  });
-};
+      }
+    });
+  };
 
-// ********** HTML Components  ********** //
-// the basic HMTL structure of app
-const htmlStructure = () => {
+  // ********** HTML Components  ********** //
+  // the basic HMTL structure of app
+  const htmlStructure = () => {
     const domString = `
     <div id="header-container" class="header mb-3"></div>
     <div id="form-container" class="container mb-3 text-center"></div>
@@ -61,11 +99,11 @@ const htmlStructure = () => {
     <div id="student-container" class="container d-flex"></div>
     `;
 
-  renderToDOM('#app', domString)
-};
+    renderToDOM('#app', domString);
+  };
 
-const header = () => {
-  const domString = `<div class="container">
+  const header = () => {
+    const domString = `<div class="container">
     <h1>Welcome to Hoggy Hogwarts Sorting Hat!</h1>
     <p>
       Hmm, difficult. VERY difficult. <br />Plenty of courage, I see.
@@ -74,27 +112,21 @@ const header = () => {
     </p>
   </div>`;
 
-  renderToDOM('#header-container', domString);
-};
+    renderToDOM('#header-container', domString);
+  };
 
-const startSortingBtn = () => {
-  const domString = '<button type="button" class="btn btn-info" id="start-sorting">Start the Sorting Ceremony!</button>';
+  const startSortingBtn = () => {
+    const domString = '<button type="button" class="btn btn-info" id="start-sorting">Start the Sorting Ceremony!</button>';
 
-  renderToDOM('#form-container', domString);
-};
+    renderToDOM('#form-container', domString);
+  };
 
-const studentAreas = () => {
-  const domString = `<div id="students">No Students</div>
-  <div id="voldy">No Death Eaters</div>`
+  const studentAreas = () => {
+    const domString = `<div id="students">No Students</div>
+  <div id="voldy">No Death Eaters</div>`;
 
-  renderToDOM('#student-container', domString);
-};
-
-const studentsOnDom = (divId, array, house = 'Hogwarts') => {
-  let domString = '';
-  if(!array.length){
-    domString += `NO ${house.toUpperCase()} STUDENTS`
-  }
+    renderToDOM('#student-container', domString);
+  };
 
   array.forEach((student) => {
     domString += `
@@ -130,6 +162,15 @@ const filterBtnRow = () => {
   renderToDOM('#filter-container', domString);
 };
 
+const events = () => {
+  // get form on the DOM on button click
+    document.querySelector('#start-sorting').addEventListener('click', () => {
+    // put html elements on the DOM on click
+      form(); // form
+      filterBtnRow(); // filter buttons
+      studentAreas(); // students and voldy's army divs
+    });
+
 // ********** LOGIC  ********** //
 // sorts student to a house and then place them in the students array
 const sortStudent = (e) => {
@@ -161,55 +202,15 @@ const createId = (array) => {
   return 0;
 };
 
-
 // add form to DOM on start-sorting click.
 // Add events for form after the form is on the DOM
-const form = () => {
-  const domString = `<form id="sorting" class="d-flex flex-column form-floating ">
-    <input
-    type="text"
-    class="form-control mb-1"
-    id="student-name"
-    placeholder="Enter a name"
-    required
-  />
-  <label for="floatingInputValue">Name to be sorted</label>
-<button type="submit" class="btn btn-success">Get Sorted!</button>
-</form>`;
 
-  renderToDOM('#form-container', domString);
-
-  // has to be put on the DOM after form is on DOM, not before
-  // on form submit, sort student
-  document.querySelector('#sorting').addEventListener('submit', sortStudent);
-};
-
-const renderToDOM = (divId, content) => {
-  const selectedDiv = document.querySelector(divId);
-  selectedDiv.innerHTML = content;
+const startApp = () => {
+  htmlStructure(); // always load first
+  header();
+  startSortingBtn();
+  events(); // always load last
 };
 
 startApp();
-
-const houses = [
-  {
-    house: 'gryffindor',
-    crest:
-      'https://static.wikia.nocookie.net/pottermore/images/1/16/Gryffindor_crest.png'
-  },
-  {
-    house: 'slytherin',
-    crest:
-      'https://static.wikia.nocookie.net/pottermore/images/4/45/Slytherin_Crest.png'
-  },
-  {
-    house: 'hufflepuff',
-    crest:
-      'https://static.wikia.nocookie.net/pottermore/images/5/5e/Hufflepuff_crest.png'
-  },
-  {
-    house: 'ravenclaw',
-    crest:
-      'https://static.wikia.nocookie.net/pottermore/images/4/4f/Ravenclaw_crest.png'
-  }
-];
+}
